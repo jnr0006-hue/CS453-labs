@@ -7,6 +7,28 @@ export function handleCommand(line) {
 
     const [command, ...parts] = trimmed.split(" ");
     const argument = parts.join(" ");
+    const serverTime = new Date().toISOString();
+
+    const easterEgg = String.raw`
+           ______
+        .-       -.
+      .'            .
+     /               \
+    /                 \
+   /                   \
+  /                     \
+  |                     |
+  |                     |
+  |    I'ts an EGG?     |
+  |                     |
+  |                     |
+  \                     /
+   \                   /
+    \                 /
+      .             .
+        -.        .
+           -.___-
+`;
 
     switch (command.toUpperCase()) {
         case "ECHO":
@@ -15,18 +37,29 @@ export function handleCommand(line) {
         // TODO: implement UPPER
         // Example:
         // UPPER hello -> HELLO
+	case "UPPER":
+	    return argument.toUpperCase();
 
         // TODO: implement LOWER
         // Example:
         // LOWER HELLO -> hello
+	case "LOWER":
+	    return argument.toLowerCase();
 
         // TODO: implement REVERSE
         // Example:
         // REVERSE hello -> olleh
+	case "REVERSE":
+	    return argument.split('').reverse().join('');
 
         // TODO: implement TIME
         // Example:
         // TIME -> current server time
+	case "TIME":
+	    return serverTime;
+
+	case "EASTEREGG":
+	    return easterEgg;
 
         case "QUIT":
             return "Goodbye.";

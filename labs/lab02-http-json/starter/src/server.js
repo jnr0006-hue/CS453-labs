@@ -38,11 +38,49 @@ export function readJsonBody(req) {
 }
 
 export function handleCalculate(body) {
-    // TODO: Validate that operation, a, and b are present.
-    // TODO: Validate that a and b are numbers.
-    // TODO: Support add, subtract, multiply, and divide.
-    // TODO: Return an error for unsupported operations.
-    // TODO: Return an error for division by zero.
+    const { operation, a, b } = body ?? {};
+    if (operation == null || a == null || b == null) {
+        return {
+            statusCode: 400, response: { error: "operation, a, and b are required" }
+        };
+    }
+
+    const numA = Number(a);
+    const numB = Number(b);
+
+    if (!Number.isFinite(numA) || !Number.isFinite(numB)) {
+        return {
+            statusCode: 400, response: { error: "a and b must be valid numbers" }
+        };
+    }
+
+    let result;
+
+    switch (operation) {
+        case "add":
+            result = numA + numB;
+            break;
+        case "subtract":
+            result = numA - numB;
+            break;
+        case "multiply":
+            result = numA * numB;
+            break;
+        case "divide":
+            if (numB === 0) {
+                return {
+                    statusCode: 400, response: { error: "division by zero is not allowed" }
+                };
+            }
+            result = numA / numB;
+            break;
+        default:
+            return { statusCode: 400, response: { error: "unsupported operation" }
+            };
+    }
+
+    return { statusCode: 200, response: { result }
+    };
 
     return {
         statusCode: 501,
@@ -64,8 +102,7 @@ export async function requestHandler(req, res) {
     }
 
     if (method === "GET" && url === "/requests") {
-        // TODO: Return the current request count as JSON.
-        sendJson(res, 501, { error: "Request counter not implemented yet" });
+        sendJson(res, 200, { count: requestCount });
         return;
     }
 
@@ -73,8 +110,7 @@ export async function requestHandler(req, res) {
         try {
             const body = await readJsonBody(req);
 
-            // TODO: Return the parsed JSON body back to the client.
-            sendJson(res, 501, { error: "Echo not implemented yet" });
+            sendJson(res, 200, body);
         } catch {
             sendJson(res, 400, { error: "Invalid JSON" });
         }

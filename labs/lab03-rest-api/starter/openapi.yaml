@@ -1,0 +1,207 @@
+openapi: 3.0.3
+info:
+  title: Inventory API
+  version: 1.0.0
+  description: >
+    A simple in-memory inventory API built with Express.
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: Health
+    description: Health check endpoint
+  - name: Items
+    description: Inventory item operations
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Returns API health status.
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: ok
+
+  /items:
+    get:
+      tags:
+        - Items
+      summary: List items
+      description: Returns all inventory items.
+      responses:
+        "200":
+          description: A list of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+              example:
+                - id: 1
+                  name: keyboard
+                  quantity: 10
+                - id: 2
+                  name: mouse
+                  quantity: 5
+
+    post:
+      tags:
+        - Items
+      summary: Create item
+      description: Creates a new inventory item.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewItem"
+            example:
+              name: monitor
+              quantity: 7
+      responses:
+        "201":
+          description: Item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+              example:
+                id: 3
+                name: monitor
+                quantity: 7
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingName:
+                  summary: Name is required
+                  value:
+                    error: Name is required
+                invalidQuantity:
+                  summary: Quantity must be a non-negative integer
+                  value:
+                    error: Quantity must be a non-negative integer
+
+  /items/{id}:
+    get:
+      tags:
+        - Items
+      summary: Get item by ID
+      description: Returns a single inventory item by ID.
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      responses:
+        "200":
+          description: The requested item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+              example:
+                id: 1
+                name: keyboard
+                quantity: 10
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Item not found
+
+    delete:
+      tags:
+        - Items
+      summary: Delete item
+      description: Deletes an inventory item by ID.
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      responses:
+        "204":
+          description: Item deleted successfully
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Item not found
+
+components:
+  parameters:
+    ItemId:
+      name: id
+      in: path
+      required: true
+      description: Numeric item ID
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: ok
+
+    Item:
+      type: object
+      required:
+        - id
+        - name
+        - quantity
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: keyboard
+        quantity:
+          type: integer
+          minimum: 0
+          example: 10
+
+    NewItem:
+      type: object
+      required:
+        - name
+        - quantity
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: monitor
+        quantity:
+          type: integer
+          minimum: 0
+          example: 7
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Item not found
